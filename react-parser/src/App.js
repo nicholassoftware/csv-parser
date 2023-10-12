@@ -2,12 +2,12 @@ import axios from "axios";
 import React, { useState } from "react";
 
 const App = () => {
+  const [disabledBtn, setDisabledBtn] = useState(false);
   const [values, setValue] = useState({
     date: "",
     vendorName: "",
     selectedFile: null,
   });
-
   const [valuesError, setValueError] = useState({
     dateError: null,
     vendorNameError: null,
@@ -47,6 +47,7 @@ const App = () => {
   };
 
   const handleSubmit = async (e) => {
+    setDisabledBtn(true);
     clearError();
     e.preventDefault();
     if (
@@ -69,6 +70,8 @@ const App = () => {
         setValueError
       )
     ) {
+      setDisabledBtn(false);
+
       return;
     }
 
@@ -87,6 +90,7 @@ const App = () => {
       console.error("error:::::::", error);
     } finally {
       clearFieldValues();
+      setDisabledBtn(false);
     }
   };
 
@@ -130,15 +134,9 @@ const App = () => {
               <div>{valuesError?.selectedFileError}</div>
             ) : null}
           </div>
-
-          {values?.selectedFile && (
-            <div>
-              <p>Selected File: {values?.selectedFile?.name}</p>
-              <p>File Size: {values?.selectedFile?.size} bytes</p>
-            </div>
-          )}
-
-          <button type="submit">Submit</button>
+          <button type="submit" disabled={disabledBtn}>
+            Submit
+          </button>
         </form>
       </div>
     </div>
