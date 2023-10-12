@@ -1,6 +1,5 @@
-import React, { useState } from "react";
 import axios from "axios";
-
+import React, { useState } from "react";
 
 const App = () => {
   const [values, setValue] = useState({
@@ -15,8 +14,20 @@ const App = () => {
     selectedFileError: null,
   });
 
-  const handleChange = (e) => {
-    setValue({ ...values, [e.value.name]: e.value.target });
+  const clearFieldValues = () => {
+    setValue({
+      date: "",
+      vendorName: "",
+      selectedFile: null,
+    });
+  };
+
+  const clearError = () => {
+    setValueError({
+      dateError: null,
+      vendorNameError: null,
+      selectedFileError: null,
+    });
   };
 
   const handleFileChange = (e) => {
@@ -24,25 +35,40 @@ const App = () => {
     setValue({ ...values, selectedFile: file });
   };
 
+  const checkAndSetError = (fieldName, value, errorMessage, setError) => {
+    if (!value) {
+      setError((prevErrors) => ({
+        ...prevErrors,
+        [fieldName]: errorMessage,
+      }));
+      return true;
+    }
+    return false;
+  };
+
   const handleSubmit = async (e) => {
+    clearError();
     e.preventDefault();
-    if (!values.date || !values.vendorName || !values.selectedFile) {
-      console.log("inside error");
-      if (!values.date)
-        setValueError({
-          ...valuesError,
-          dateError: "This field is required*.",
-        });
-      if (!values.vendorName)
-        setValueError({
-          ...valuesError,
-          vendorNameError: "This field is required*.",
-        });
-      if (!values.selectedFile)
-        setValueError({
-          ...valuesError,
-          selectedFileError: "This field is required*.",
-        });
+    if (
+      checkAndSetError(
+        "dateError",
+        values.date,
+        "This field is required*.",
+        setValueError
+      ) ||
+      checkAndSetError(
+        "vendorNameError",
+        values.vendorName,
+        "This field is required*.",
+        setValueError
+      ) ||
+      checkAndSetError(
+        "selectedFileError",
+        values.selectedFile,
+        "This field is required*.",
+        setValueError
+      )
+    ) {
       return;
     }
 
@@ -58,60 +84,63 @@ const App = () => {
       );
       console.log({ response });
     } catch (error) {
-      console.log("error:::::::", error);
+      console.error("error:::::::", error);
+    } finally {
+      clearFieldValues();
     }
   };
 
-  console.log({ valuesError });
-  console.log({ values });
-
   return (
     <div>
-      <h2>Details Upload Form</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Date:</label>
-          <input
-            type="date"
-            name="date"
-            value={values.date}
-            onChange={(e) => setValue({ ...values, date: e.target.value })}
-          />
-          {valuesError?.dateError ? <div>{valuesError?.dateError}</div> : null}
-        </div>
-
-        <div>
-          <label>Vendor Name:</label>
-          <input
-            type="text"
-            name="vendorName"
-            value={values.vendorName}
-            onChange={(e) =>
-              setValue({ ...values, vendorName: e.target.value })
-            }
-          />
-          {valuesError?.vendorNameError ? (
-            <div>{valuesError?.vendorNameError}</div>
-          ) : null}
-        </div>
-
-        <div>
-          <label>Upload a File:</label>
-          <input type="file" accept=".csv" onChange={handleFileChange} />
-          {valuesError?.selectedFileError ? (
-            <div>{valuesError?.selectedFileError}</div>
-          ) : null}
-        </div>
-
-        {values?.selectedFile && (
+      <div>
+        <h2>Details Upload Form</h2>
+        <form onSubmit={handleSubmit}>
           <div>
-            <p>Selected File: {values?.selectedFile?.name}</p>
-            <p>File Size: {values?.selectedFile?.size} bytes</p>
+            <label>Date:</label>
+            <input
+              type="date"
+              name="date"
+              value={values.date}
+              onChange={(e) => setValue({ ...values, date: e.target.value })}
+            />
+            {valuesError?.dateError ? (
+              <div>{valuesError?.dateError}</div>
+            ) : null}
           </div>
-        )}
 
-        <button type="submit">Submit</button>
-      </form>
+          <div>
+            <label>Vendor Name:</label>
+            <input
+              type="text"
+              name="vendorName"
+              value={values.vendorName}
+              onChange={(e) =>
+                setValue({ ...values, vendorName: e.target.value })
+              }
+            />
+            {valuesError?.vendorNameError ? (
+              <div>{valuesError?.vendorNameError}</div>
+            ) : null}
+          </div>
+
+          <div>
+            <label>Upload a File:</label>
+            <input type="file" accept=".csv" onChange={handleFileChange} />
+            {valuesError?.selectedFileError ? (
+              <div>{valuesError?.selectedFileError}</div>
+            ) : null}
+          </div>
+
+          {values?.selectedFile && (
+            <div>
+              <p>Selected File: {values?.selectedFile?.name}</p>
+              <p>File Size: {values?.selectedFile?.size} bytes</p>
+            </div>
+          )}
+
+          <button type="submit">Submit</button>
+        </form>
+      </div>
     </div>
   );
 };
