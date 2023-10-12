@@ -1,14 +1,18 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const { upload } = require("./services/csv-upload");
 const { CsvStringParser, validateCSV } = require("./services/csv-parse");
 
+app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-    extended: true
-}));
+app.use(
+  bodyParser.urlencoded({
+    extended: true,
+  })
+);
 
 app.get("/", (req, res) => {
   res.send("Hello CSV-Parser API");
